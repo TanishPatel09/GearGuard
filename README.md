@@ -4,6 +4,10 @@
 
 Built with **React**, **Supabase**, and **TailwindCSS**, it offers an enterprise-grade interface inspired by Odoo, featuring real-time tracking, drag-and-drop Kanban boards, and comprehensive reporting.
 
+### 🟢 **Live Preview**: [https://gearguard25.netlify.app/](https://gearguard25.netlify.app/)
+
+_(The application is live and connected to a test database. No setup required to test!)_
+
 ---
 
 ## 🚀 Key Features
@@ -33,49 +37,27 @@ Built with **React**, **Supabase**, and **TailwindCSS**, it offers an enterprise
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚡ Run Locally
 
-Follow these steps to get GearGuard running locally.
+Since the project is pre-configured for the hackathon explanation, you can simply:
 
-### Prerequisites
+1.  **Clone the Repository**
 
-- Node.js (v16+)
-- npm or yarn
-- A Supabase project
+    ```bash
+    git clone <repository_url>
+    cd gearguard
+    ```
 
-### 1. Clone the Repository
+2.  **Install Dependencies**
 
-```bash
-git clone <repository_url>
-cd gearguard
-```
+    ```bash
+    npm install
+    ```
 
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the root directory and add your Supabase credentials:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 4. Setup Database
-
-Run the SQL script located at `supabase/schema-clean.sql` in your Supabase SQL Editor to create the necessary tables, policies, and indexes.
-
-### 5. Run Development Server
-
-```bash
-npm run dev
-```
-
-The app will be available at `http://localhost:5173`.
+3.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
 
 ---
 
