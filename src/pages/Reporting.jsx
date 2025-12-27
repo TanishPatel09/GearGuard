@@ -84,7 +84,7 @@ const Reporting = () => {
                       key={request.id}
                       id={`#REQ-${request.id}`}
                       equipment={request.equipment}
-                      date={new Date(request.requestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      date={new Date(request.request_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       assignee={request.technician || 'Unassigned'}
                       stage={request.stage}
                       progress={request.stage === 'Repaired' ? 100 : request.stage === 'In Progress' ? 65 : request.stage === 'New' ? 10 : 0}
@@ -137,7 +137,7 @@ function ReportCard({ title, value, trend, trendPositive, color, icon, subtext }
     )
 }
 
-function TrackingRow({ id, equipment, date, assignee, stage, progress }) {
+function TrackingRow({ id, equipment, date, assignee, stage, progress, isOverdue }) {
     const stageColors = {
         'New': 'bg-status-new-bg text-status-new-text border-status-new-text/20',
         'In Progress': 'bg-blue-100 text-blue-700 border-blue-200',
@@ -149,7 +149,10 @@ function TrackingRow({ id, equipment, date, assignee, stage, progress }) {
         <tr className="hover:bg-gray-50 transition-colors">
             <td className="px-4 py-3 font-medium text-primary">{id}</td>
             <td className="px-4 py-3 text-text-main">{equipment}</td>
-            <td className="px-4 py-3 text-text-sub">{date}</td>
+            <td className="px-4 py-3 text-text-sub">
+                {date}
+                {isOverdue && <span className="block text-[10px] font-bold text-red-600 uppercase">Overdue</span>}
+            </td>
             <td className="px-4 py-3 text-text-main flex items-center gap-2">
                 {assignee !== 'Unassigned' && <div className="w-6 h-6 rounded-full bg-gray-200 text-xs flex items-center justify-center font-bold text-gray-600">{assignee.charAt(0)}</div>}
                 {assignee}

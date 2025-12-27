@@ -1,58 +1,62 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-toastify'
 
 const Login = () => {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
   const [isRightPanelActive, setIsRightPanelActive] = useState(false)
   
   // Sign In state
   const [signInEmail, setSignInEmail] = useState('')
   const [signInPassword, setSignInPassword] = useState('')
-  const [signInError, setSignInError] = useState('')
   const [signInLoading, setSignInLoading] = useState(false)
   
   // Sign Up state
   const [signUpName, setSignUpName] = useState('')
   const [signUpEmail, setSignUpEmail] = useState('')
   const [signUpPassword, setSignUpPassword] = useState('')
-  const [signUpError, setSignUpError] = useState('')
   const [signUpLoading, setSignUpLoading] = useState(false)
 
   const handleSignIn = async (e) => {
     e.preventDefault()
     setSignInLoading(true)
-    setSignInError('')
 
     const { error } = await signIn(signInEmail, signInPassword)
     
     if (error) {
-      setSignInError(error.message)
+      toast.error(error.message)
       setSignInLoading(false)
       return
     }
 
+    toast.success('Welcome back!')
     navigate('/dashboard')
   }
 
   const handleSignUp = async (e) => {
     e.preventDefault()
     setSignUpLoading(true)
-    setSignUpError('')
 
     const { error } = await signUp(signUpEmail, signUpPassword, { name: signUpName })
     
     if (error) {
-      setSignUpError(error.message)
+      toast.error(error.message)
       setSignUpLoading(false)
       return
     }
 
-    // Auto sign in after sign up
-    const { error: signInError } = await signIn(signUpEmail, signUpPassword)
-    if (!signInError) {
-      navigate('/dashboard')
+    toast.success('Account created! Please check your email to verify your account before logging in.')
+    setSignUpLoading(false)
+    setIsRightPanelActive(false) // Switch to sign in view
+  }
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await signInWithGoogle()
+    if (error) {
+      console.error('Google Sign In Error:', error)
+      toast.error(error.message || 'Failed to sign in with Google')
     }
   }
 
@@ -77,13 +81,18 @@ const Login = () => {
           <form onSubmit={handleSignUp} className="flex items-center justify-center flex-col px-8 md:px-12 h-full text-center">
             <h1 className="font-bold m-0 text-text-main text-3xl mb-4">Create Account</h1>
             
-            {signUpError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm w-full">
-                {signUpError}
-              </div>
-            )}
+            <div className="flex justify-center gap-4 mb-4">
+              <button 
+                type="button" 
+                onClick={handleGoogleSignIn}
+                className="border border-white/50 rounded-full w-10 h-10 flex items-center justify-center bg-white/30 hover:bg-white/50 transition-colors shadow-sm"
+                title="Sign up with Google"
+              >
+                <GoogleIcon />
+              </button>
+            </div>
 
-            <span className="text-xs text-text-main mb-2">use your email for registration</span>
+            <span className="text-xs text-text-main mb-2">or use your email for registration</span>
             <input 
               type="text" 
               placeholder="Name" 
@@ -96,7 +105,7 @@ const Login = () => {
               type="email" 
               placeholder="Email" 
               value={signUpEmail}
-              onChange={(e) => setSignUpEmail(e.target.value)}
+              onChange={(e) => setSignUpEmail(e.target.value.trim())}
               required
               className="bg-white/50 border border-white/30 p-[12px_15px] my-2 w-full rounded-md placeholder:text-gray-500 text-text-main focus:outline-none focus:ring-2 focus:ring-white/50" 
             />
@@ -130,18 +139,23 @@ const Login = () => {
           <form onSubmit={handleSignIn} className="flex items-center justify-center flex-col px-8 md:px-12 h-full text-center">
             <h1 className="font-bold m-0 text-text-main text-3xl mb-4">Sign in</h1>
             
-            {signInError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm w-full">
-                {signInError}
-              </div>
-            )}
+            <div className="flex justify-center gap-4 mb-4">
+              <button 
+                type="button" 
+                onClick={handleGoogleSignIn}
+                className="border border-white/50 rounded-full w-10 h-10 flex items-center justify-center bg-white/30 hover:bg-white/50 transition-colors shadow-sm"
+                title="Sign in with Google"
+              >
+                <GoogleIcon />
+              </button>
+            </div>
 
-            <span className="text-xs text-text-main mb-2">use your account</span>
+            <span className="text-xs text-text-main mb-2">or use your account</span>
             <input 
               type="email" 
               placeholder="Email" 
               value={signInEmail}
-              onChange={(e) => setSignInEmail(e.target.value)}
+              onChange={(e) => setSignInEmail(e.target.value.trim())}
               required
               className="bg-white/50 border border-white/30 p-[12px_15px] my-2 w-full rounded-md placeholder:text-gray-500 text-text-main focus:outline-none focus:ring-2 focus:ring-white/50" 
             />

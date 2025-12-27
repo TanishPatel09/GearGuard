@@ -24,16 +24,23 @@ const Activity = () => {
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [view, setView] = useState('month')
+  const [date, setDate] = useState(new Date())
 
   // Convert requests to calendar events
   const events = useMemo(() => {
     return requests
-      .filter(req => req.scheduledDate)
+      .filter(req => req.scheduled_date)
       .map(req => {
-        const startDate = new Date(req.scheduledDate)
-        if (req.scheduledTime) {
-          const [hours, minutes] = req.scheduledTime.split(':')
+        // Parse date properly ensuring no timezone offset issues
+        const dateParts = req.scheduled_date.split('-')
+        const startDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2])
+        
+        if (req.scheduled_time) {
+          const [hours, minutes] = req.scheduled_time.split(':')
           startDate.setHours(parseInt(hours), parseInt(minutes))
+        } else {
+          // If no time, set to 9 AM
+          startDate.setHours(9, 0)
         }
 
         // Calculate end time based on duration
@@ -147,6 +154,8 @@ const Activity = () => {
             eventPropGetter={eventStyleGetter}
             view={view}
             onView={setView}
+            date={date}
+            onNavigate={setDate}
             views={['month', 'week', 'day', 'agenda']}
             popup
             tooltipAccessor={(event) => `${event.title} - ${event.resource.equipment}`}
@@ -162,7 +171,7 @@ const Activity = () => {
             setSelectedRequest(null)
             setSelectedDate(null)
           }}
-          initialData={selectedRequest || (selectedDate ? { scheduledDate: selectedDate, maintenanceType: 'Preventive' } : null)}
+          initialData={selectedRequest || (selectedDate ? { scheduled_date: selectedDate, maintenance_type: 'Preventive' } : null)}
         />
       )}
 

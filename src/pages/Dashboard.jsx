@@ -6,22 +6,44 @@ import {
   Wrench, 
   FileText, 
   Plus,
-  Filter
+  Filter,
+  CheckCircle,
+  Clock,
+  Database
 } from 'lucide-react'
 import { useMaintenanceContext } from '../context/MaintenanceContext'
 import MaintenanceRequest from './MaintenanceRequest'
+import { seedDatabase } from '../utils/seedData'
 
 
 const Dashboard = () => {
-  const { requests, getDashboardMetrics, isOverdue } = useMaintenanceContext()
+  const { requests, getDashboardMetrics, isOverdue, loading } = useMaintenanceContext()
   const metrics = getDashboardMetrics()
   const [searchTerm, setSearchTerm] = useState('')
   const [showRequestForm, setShowRequestForm] = useState(false)
+
+  const handleSeed = () => {
+    if (window.confirm('This will populate the database with Indian test data. Continue?')) {
+      seedDatabase()
+    }
+  }
 
   // Get recent requests (last 10)
   const recentRequests = requests
     .filter(req => req.stage === 'New' || req.stage === 'In Progress')
     .slice(0, 10)
+
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-background text-primary">
+         <div className="flex flex-col items-center gap-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="text-sm font-medium">Loading Dashboard...</span>
+         </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full min-h-screen flex flex-col font-sans text-text-main bg-background">
 
@@ -39,6 +61,8 @@ const Dashboard = () => {
             <Plus size={16} />
             <span>New Request</span>
           </button>
+
+          
           
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-sub" size={18} />
@@ -133,7 +157,8 @@ const Dashboard = () => {
 function MetricCard({ title, value, subtext, icon, theme }) {
   const themes = {
     danger: 'bg-status-danger-bg border-status-danger-text/30 text-status-danger-text',
-    progress: 'bg-status-new-bg border-status-new-text/30 text-status-new-text', // Using blue 'new' theme for progress aesthetics
+    new: 'bg-status-new-bg border-status-new-text/30 text-status-new-text',
+    progress: 'bg-status-progress-bg border-status-progress-text/30 text-status-progress-text',
     repaired: 'bg-status-repaired-bg border-status-repaired-text/30 text-status-repaired-text',
   }
   

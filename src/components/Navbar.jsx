@@ -16,11 +16,12 @@ const Navbar = () => {
     <div className="bg-surface border-b border-border px-6 sticky top-0 z-50">
       <div className="flex justify-between items-center">
         <div className="flex space-x-6 overflow-x-auto">
-          <TabItem to="/work-center" label="Maintenance" />
+          <TabItem to="/maintenance-requests" label="Maintenance" />
           <TabItem to="/dashboard" label="Dashboard" />
           <TabItem to="/activity" label="Maintenance Calendar" />
           <TabItem to="/equipment" label="Equipment" />
           <TabItem to="/reporting" label="Reporting" />
+          <TabItem to="/work-center" label="Work Centers" />
           <TabItem to="/team" label="Teams" />
         </div>
         

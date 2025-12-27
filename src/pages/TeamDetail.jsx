@@ -1,6 +1,4 @@
-import React, { useState } from 'react'
-import { X, ChevronDown, Save, UserPlus, Trash2 } from 'lucide-react'
-import { useMaintenanceContext } from '../context/MaintenanceContext'
+import { toast } from 'react-toastify'
 
 const TeamDetail = ({ onClose, initialData = null }) => {
   const { addTeam, updateTeam } = useMaintenanceContext()
@@ -42,16 +40,22 @@ const TeamDetail = ({ onClose, initialData = null }) => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (initialData && initialData.id) {
-      updateTeam(initialData.id, formData)
-    } else {
-      addTeam(formData)
+    try {
+      if (initialData && initialData.id) {
+        await updateTeam(initialData.id, formData)
+        toast.success('Team updated successfully')
+      } else {
+        await addTeam(formData)
+        toast.success('Team added successfully')
+      }
+      onClose()
+    } catch (error) {
+       toast.error('Failed to save team')
+       console.error(error)
     }
-    
-    onClose()
   }
 
   return (

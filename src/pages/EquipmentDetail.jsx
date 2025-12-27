@@ -1,25 +1,33 @@
 import React, { useState } from 'react'
 import { X, ChevronDown, Calendar, Wrench, Save } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useMaintenanceContext } from '../context/MaintenanceContext'
+import { toast } from 'react-toastify'
 
 const EquipmentDetail = ({ onClose, initialData = null }) => {
-  const { teams, addEquipment, updateEquipment, getOpenRequestsCount } = useMaintenanceContext()
+  const navigate = useNavigate()
+  const { teams, workCenters, addEquipment, updateEquipment, getOpenRequestsCount } = useMaintenanceContext()
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
-    serialNumber: initialData?.serialNumber || '',
+    serial_number: initialData?.serial_number || '',
     category: initialData?.category || '',
     department: initialData?.department || '',
     employee: initialData?.employee || '',
     team: initialData?.team || '',
     technician: initialData?.technician || '',
-    purchaseDate: initialData?.purchaseDate || '',
-    warrantyExpiration: initialData?.warrantyExpiration || '',
+    purchase_date: initialData?.purchase_date || '',
+    warranty_expiration: initialData?.warranty_expiration || '',
     location: initialData?.location || '',
     company: initialData?.company || '',
+    work_center: initialData?.work_center || '',
+    assigned_date: initialData?.assigned_date || '',
+    scrap_date: initialData?.scrap_date || '',
     status: initialData?.status || 'Active',
     notes: initialData?.notes || ''
   })
+
+  const [loading, setLoading] = useState(false)
 
   const categories = ['Computers', 'Monitors', 'Machinery', 'Vehicles', 'Tools', 'Other']
   const departments = ['Admin', 'Production', 'Technician', 'IT', 'Maintenance', 'Other']
@@ -34,16 +42,30 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
     
-    if (initialData && initialData.id) {
-      updateEquipment(initialData.id, formData)
-    } else {
-      addEquipment(formData)
+    try {
+      let result
+      if (initialData && initialData.id) {
+        result = await updateEquipment(initialData.id, formData)
+      } else {
+        result = await addEquipment(formData)
+      }
+      
+      if (result.error) {
+        toast.error(result.error.message || 'Failed to save equipment')
+        setLoading(false)
+        return
+      }
+      
+      toast.success(initialData ? 'Equipment updated' : 'Equipment added')
+      onClose()
+    } catch (err) {
+      toast.error(err.message || 'An error occurred')
+      setLoading(false)
     }
-    
-    onClose()
   }
 
   const requestCount = initialData?.id ? getOpenRequestsCount(initialData.id) : 0
@@ -54,23 +76,35 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-gray-50/50">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1">
             <h2 className="text-xl font-semibold text-text-main">
               {initialData ? 'Edit Equipment' : 'New Equipment'}
             </h2>
-            {requestCount > 0 && (
-              <button className="flex items-center gap-2 bg-primary-subtle text-primary px-3 py-1.5 rounded-lg font-medium border border-primary/20 hover:bg-primary/10 transition-colors">
-                <Wrench size={16} />
-                <span>{requestCount} Maintenance Request{requestCount !== 1 ? 's' : ''}</span>
-              </button>
-            )}
           </div>
-          <button 
-            onClick={onClose}
-            className="text-text-sub hover:text-text-main transition-colors"
-          >
-            <X size={24} />
-          </button>
+          
+          <div className="flex items-center gap-4">
+             {requestCount > 0 && (
+               <button 
+                 onClick={() => {
+                   navigate(`/maintenance-requests?equipment=${initialData.name}`)
+                   onClose()
+                 }}
+                 className="hidden md:flex flex-col items-center justify-center w-32 h-12 bg-surface hover:bg-gray-50 border border-border rounded shadow-sm transition-colors text-primary overflow-hidden relative"
+               >
+                 <div className="flex items-center gap-2 font-medium">
+                   <Wrench size={16} />
+                   <span>Requests</span>
+                 </div>
+                 <span className="text-xs text-text-sub">{requestCount} Active</span>
+               </button>
+             )}
+            <button 
+              onClick={onClose}
+              className="text-text-sub hover:text-text-main transition-colors ml-4"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Form Content */}
@@ -102,8 +136,8 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
                 </label>
                 <input
                   type="text"
-                  value={formData.serialNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
+                  value={formData.serial_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, serial_number: e.target.value }))}
                   className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-mono text-sm"
                   placeholder="e.g., MT/125/22779837"
                   required
@@ -179,6 +213,52 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
                 />
               </div>
 
+              {/* Work Center */}
+              <div>
+                <label className="block text-sm font-medium text-text-main mb-1">
+                  Work Center
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.work_center || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, work_center: e.target.value }))}
+                    className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary appearance-none"
+                  >
+                    <option value="">Select work center...</option>
+                    {workCenters && workCenters.map(wc => (
+                      <option key={wc.id} value={wc.name}>{wc.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-text-sub pointer-events-none" size={16} />
+                </div>
+              </div>
+
+              {/* Assigned Date */}
+              <div>
+                <label className="block text-sm font-medium text-text-main mb-1">
+                  Assigned Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.assigned_date || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, assigned_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              {/* Scrap Date */}
+              <div>
+                <label className="block text-sm font-medium text-text-main mb-1">
+                  Scrap Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.scrap_date || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, scrap_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
             </div>
 
             {/* Right Column */}
@@ -224,36 +304,28 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
                 </div>
               </div>
 
-              {/* Purchase Date */}
               <div>
                 <label className="block text-sm font-medium text-text-main mb-1">
                   Purchase Date
                 </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={formData.purchaseDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, purchaseDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-text-sub pointer-events-none" size={16} />
-                </div>
+                <input
+                  type="date"
+                  value={formData.purchase_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                />
               </div>
 
-              {/* Warranty Expiration */}
               <div>
                 <label className="block text-sm font-medium text-text-main mb-1">
                   Warranty Expiration
                 </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={formData.warrantyExpiration}
-                    onChange={(e) => setFormData(prev => ({ ...prev, warrantyExpiration: e.target.value }))}
-                    className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-text-sub pointer-events-none" size={16} />
-                </div>
+                <input
+                  type="date"
+                  value={formData.warranty_expiration}
+                  onChange={(e) => setFormData(prev => ({ ...prev, warranty_expiration: e.target.value }))}
+                  className="w-full px-3 py-2 border border-border rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                />
               </div>
 
               {/* Status */}
@@ -316,10 +388,11 @@ const EquipmentDetail = ({ onClose, initialData = null }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors shadow-sm flex items-center gap-2"
+              disabled={loading}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save size={16} />
-              Save Equipment
+              {loading ? 'Saving...' : 'Save Equipment'}
             </button>
           </div>
         </form>

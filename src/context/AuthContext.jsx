@@ -76,12 +76,33 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      })
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Google Sign in error:', error)
+      return { data: null, error }
+    }
+  }
+
   const value = {
     user,
     loading,
     signUp,
     signIn,
-    signOut
+    signOut,
+    signInWithGoogle
   }
 
   return (

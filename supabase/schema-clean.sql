@@ -53,6 +53,7 @@ CREATE TABLE maintenance_requests (
   company TEXT,
   notes TEXT,
   instructions TEXT,
+  worksheet JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
@@ -134,4 +135,42 @@ CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_requests_updated_at BEFORE UPDATE ON maintenance_requests
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TABLE work_centers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  code TEXT,
+  tag TEXT,
+  alternative TEXT,
+  cost NUMERIC DEFAULT 0,
+  capacity NUMERIC DEFAULT 1,
+  efficiency NUMERIC DEFAULT 100,
+  oee_target NUMERIC DEFAULT 90,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_work_centers_user ON work_centers(user_id);
+
+ALTER TABLE work_centers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own work centers"
+  ON work_centers FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own work centers"
+  ON work_centers FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own work centers"
+  ON work_centers FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own work centers"
+  ON work_centers FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_work_centers_updated_at BEFORE UPDATE ON work_centers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

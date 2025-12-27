@@ -16,6 +16,7 @@ export const MaintenanceProvider = ({ children }) => {
   const { user } = useAuth()
   const [equipment, setEquipment] = useState([])
   const [teams, setTeams] = useState([])
+  const [workCenters, setWorkCenters] = useState([])
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -27,6 +28,7 @@ export const MaintenanceProvider = ({ children }) => {
       // Clear data when user logs out
       setEquipment([])
       setTeams([])
+      setWorkCenters([])
       setRequests([])
       setLoading(false)
     }
@@ -37,6 +39,7 @@ export const MaintenanceProvider = ({ children }) => {
     await Promise.all([
       fetchEquipment(),
       fetchTeams(),
+      fetchWorkCenters(),
       fetchRequests()
     ])
     setLoading(false)
@@ -205,6 +208,10 @@ export const MaintenanceProvider = ({ children }) => {
   }
 
   const updateRequest = async (id, updates) => {
+    // Optimistic Update
+    const previousRequests = requests
+    setRequests(requests.map(req => req.id === id ? { ...req, ...updates } : req))
+
     try {
       const { data, error } = await supabase
         .from('maintenance_requests')
@@ -213,10 +220,13 @@ export const MaintenanceProvider = ({ children }) => {
         .select()
       
       if (error) throw error
-      setRequests(requests.map(req => req.id === id ? data[0] : req))
+      // Confirm with real data from server
+      setRequests(current => current.map(req => req.id === id ? data[0] : req))
       return { data: data[0], error: null }
     } catch (error) {
       console.error('Error updating request:', error)
+      // Revert to previous state on error
+      setRequests(previousRequests)
       return { data: null, error }
     }
   }
@@ -238,8 +248,81 @@ export const MaintenanceProvider = ({ children }) => {
   }
 
   const moveRequestToStage = async (id, newStage) => {
+    // Implement Scrap Logic
+    if (newStage === 'Scrap') {
+      const request = requests.find(r => r.id === id)
+      if (request && request.equipment_id) {
+        await updateEquipment(request.equipment_id, { status: 'Scrapped' })
+      }
+    }
     return await updateRequest(id, { stage: newStage })
   }
+
+  // ========== WORK CENTERS ==========
+  
+  const fetchWorkCenters = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('work_centers')
+        .select('*')
+        .order('name', { ascending: true })
+      
+      if (error) throw error
+      setWorkCenters(data || [])
+    } catch (error) {
+      console.error('Error fetching work centers:', error)
+    }
+  }
+
+  const addWorkCenter = async (wcData) => {
+    try {
+      const { data, error } = await supabase
+        .from('work_centers')
+        .insert([{ ...wcData, user_id: user.id }])
+        .select()
+      
+      if (error) throw error
+      setWorkCenters([data[0], ...workCenters])
+      return { data: data[0], error: null }
+    } catch (error) {
+      console.error('Error adding work center:', error)
+      return { data: null, error }
+    }
+  }
+
+  const updateWorkCenter = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('work_centers')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      
+      if (error) throw error
+      setWorkCenters(workCenters.map(wc => wc.id === id ? data[0] : wc))
+      return { data: data[0], error: null }
+    } catch (error) {
+      console.error('Error updating work center:', error)
+      return { data: null, error }
+    }
+  }
+
+  const deleteWorkCenter = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('work_centers')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+      setWorkCenters(workCenters.filter(wc => wc.id !== id))
+      return { error: null }
+    } catch (error) {
+      console.error('Error deleting work center:', error)
+      return { error }
+    }
+  }
+
 
   // ========== HELPER FUNCTIONS ==========
   
@@ -292,7 +375,10 @@ export const MaintenanceProvider = ({ children }) => {
       criticalEquipment: criticalEquipment.length,
       technicianLoad,
       openRequests: openRequests.length,
-      overdueRequests: overdueRequests.length
+      overdueRequests: overdueRequests.length,
+      newRequestsCount: requests.filter(r => r.stage === 'New').length,
+      inProgressRequestsCount: requests.filter(r => r.stage === 'In Progress').length,
+      repairedRequestsCount: requests.filter(r => r.stage === 'Repaired').length
     }
   }, [requests, equipment, teams, isOverdue, getRequestsByEquipment])
 
@@ -333,6 +419,7 @@ export const MaintenanceProvider = ({ children }) => {
   const value = {
     equipment,
     teams,
+    workCenters,
     requests,
     loading,
     isOverdue,
@@ -349,6 +436,9 @@ export const MaintenanceProvider = ({ children }) => {
     addTeam,
     updateTeam,
     deleteTeam,
+    addWorkCenter,
+    updateWorkCenter,
+    deleteWorkCenter,
     getDashboardMetrics,
     getReportingMetrics,
     refreshData: fetchAllData
