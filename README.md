@@ -8,6 +8,12 @@ Built with **React**, **Supabase**, and **TailwindCSS**, it offers an enterprise
 
 _(The application is live and connected to a test database. No setup required to test!)_
 
+> [!NOTE]
+> **Use these credentials to access seeded test data:**
+>
+> - **Email**: `kd190706@gmail.com`
+> - **Password**: `admin123`
+
 ---
 
 ## 🚀 Key Features
