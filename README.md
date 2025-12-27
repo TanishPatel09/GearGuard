@@ -4,8 +4,6 @@
 
 Built with **React**, **Supabase**, and **TailwindCSS**, it offers an enterprise-grade interface inspired by Odoo, featuring real-time tracking, drag-and-drop Kanban boards, and comprehensive reporting.
 
-![GearGuard Dashboard](https://via.placeholder.com/800x400?text=GearGuard+Dashboard+Preview)
-
 ---
 
 ## 🚀 Key Features
@@ -20,18 +18,18 @@ Built with **React**, **Supabase**, and **TailwindCSS**, it offers an enterprise
 - **👥 Team Management**: Organize workforce into specialized teams (Electrical, Mechanical, IT) with workload distribution.
 - **🏭 Work Centers**: Monitor production units with efficiency, capacity, and OEE targets.
 - **📈 Analytics & Reporting**: Data visualization for resolution times, compliance rates, and technician performance.
-- **🔐 Secure Authentication**: Role-based access via Supabase Auth (Email + Google OAuth).
+- **🔐 Secure Authentication**: Role-based access via Supabase Auth.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: [React](https://reactjs.org/) (Vite)
-- **Styling**: [TailwindCSS](https://tailwindcss.com/) + Lucide Icons
-- **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Frontend**: React (Vite)
+- **Styling**: TailwindCSS + Lucide Icons
+- **Backend & Database**: Supabase (PostgreSQL)
 - **State Management**: React Context API
-- **Drag & Drop**: `@hello-pangea/dnd`
-- **Notifications**: `react-toastify`
+- **Drag & Drop**: @hello-pangea/dnd
+- **Notifications**: react-toastify
 
 ---
 
@@ -43,12 +41,12 @@ Follow these steps to get GearGuard running locally.
 
 - Node.js (v16+)
 - npm or yarn
-- A [Supabase](https://supabase.com/) project
+- A Supabase project
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/gearguard.git
+git clone <repository_url>
 cd gearguard
 ```
 
@@ -81,29 +79,6 @@ The app will be available at `http://localhost:5173`.
 
 ---
 
-## 🧪 Seeding Data
-
-To quickly test the application with sample data:
-
-1.  Log in to the app (Create an account if needed).
-2.  Navigate to the **Dashboard**.
-3.  Click the **Seed Data** button in the top action bar.
-    - _This will populate Teams, Work Centers, Equipment, and realistic Maintenance Requests._
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1.  Fork the project
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
----
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
