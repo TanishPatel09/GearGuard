@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  /* Odoo-style Core Palette */
+  /* Base */
+  --color-background: #F5F5F5;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-text-main: #1F2937;
+  --color-text-sub: #6B7280;
+
+  /* Primary Accent */
+  --color-primary: #714B67;
+  --color-primary-hover: #5E3E55;
+  --color-primary-subtle: #F2EAF0;
+
+  /* Status Colors */
+  --color-status-new-text: #2563EB;
+  --color-status-new-bg: #EFF6FF;
+
+  --color-status-progress-text: #D97706;
+  --color-status-progress-bg: #FFFBEB;
+
+  --color-status-repaired-text: #15803D;
+  --color-status-repaired-bg: #ECFDF5;
+
+  --color-status-danger-text: #B91C1C;
+  --color-status-danger-bg: #FEF2F2;
+}
+
+/* Base Layer defaults */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+  }
+}
